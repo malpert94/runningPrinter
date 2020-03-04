@@ -27,8 +27,8 @@ def pulsePin(pin):
 
 
 def shift_in(dec):
-    dec2bin = "{0:08b}".format(dec)
-    for bit in range(8):
+    dec2bin = "{0:09b}".format(dec)  # "{0:08b}" for 1 sr
+    for bit in range(9):  # 8
         if dec2bin[bit] == '1':
             print('1', end='')
             # GPIO.output(dataPin, 1)
@@ -40,6 +40,12 @@ def shift_in(dec):
 
 
 def print_job(droplets, push, pull):
+    '''
+    GPIO.output(OEPin, 0)
+    time.sleep(push)
+    GPIO.output(OEPin, 1)
+    time.sleep(pull)
+    '''
     for dot in range(droplets):
         # GPIO.output(OEPin, 0)
         print('. ', end='')
@@ -48,3 +54,5 @@ def print_job(droplets, push, pull):
         print('', end='')
         time.sleep(pull)
     print('')
+    # '''
+
