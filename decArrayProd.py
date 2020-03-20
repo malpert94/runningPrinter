@@ -90,16 +90,16 @@ def create_array(phrase, line, direction, dist):
     [array2, space] = adj_for_len(array, dist)
     array3 = line_mask(array2, line)
     matrix = np.zeros((nozzles, len(array3)+(nozzles-1)), dtype=int)
-    if direction == 'n' or direction == 'N':
+    if direction == 'n' or direction == 'N' or direction == '90':
         lsb_top(array3, nozzles, matrix)
         matrix = top_shift(matrix, nozzles)
-    elif direction == 's' or direction == 'S':
+    elif direction == 's' or direction == 'S' or direction == '270':
         msb_top(array3, nozzles, matrix)
         matrix = top_shift(matrix, nozzles)
-    elif direction == 'e' or direction == 'E':
+    elif direction == 'e' or direction == 'E' or direction == '0':
         msb_top(array3, nozzles, matrix)
         matrix = bottom_shift(matrix, nozzles)
-    elif direction == 'w' or direction == 'W':
+    elif direction == 'w' or direction == 'W' or direction == '180':
         lsb_top(array3, nozzles, matrix)
         matrix = bottom_shift(matrix, nozzles)
     printJob = to_print(matrix)
