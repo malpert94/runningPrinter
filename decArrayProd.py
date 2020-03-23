@@ -11,7 +11,7 @@ def phrase_array(phr):  # convert text to an array of decimals from characters d
 
 
 def adj_for_len(text, distance):  # adjusts length of array for distance of line and adjusts dot spacing for accuracy
-    dotDist = 10 #14.816715493  # base for calculating distance between dots: CHANGE AS NECESSARY
+    dotDist = 10  # 14.816715493  # base for calculating distance between dots: CHANGE AS NECESSARY
     if distance == 0:  # if no line is required and distance is not specified
         newDotDist = dotDist  # dot spacing not changed
         array = text  # array size not changed
@@ -47,6 +47,7 @@ def phrase_array(phr, lin, distance):  # convert text to an array of
             array.append(tobin)  # add column to phrase array
     return array
 '''
+
 
 def lsb_top(array, nozzle_count, matrix):
     for job in range(len(array)):  # make matrix with lsb in row 0
@@ -86,20 +87,20 @@ def to_print(matrix):
 
 
 def create_array(phrase, line, direction, dist):
-    array = phrase_array(phrase)  #, line, dist)
+    array = phrase_array(phrase)  # , line, dist)
     [array2, space] = adj_for_len(array, dist)
     array3 = line_mask(array2, line)
     matrix = np.zeros((nozzles, len(array3)+(nozzles-1)), dtype=int)
-    if direction == 'n' or direction == 'N' or direction == '90':
+    if direction == 'n' or direction == 'N':
         lsb_top(array3, nozzles, matrix)
         matrix = top_shift(matrix, nozzles)
-    elif direction == 's' or direction == 'S' or direction == '270':
+    elif direction == 's' or direction == 'S':
         msb_top(array3, nozzles, matrix)
         matrix = top_shift(matrix, nozzles)
-    elif direction == 'e' or direction == 'E' or direction == '0':
+    elif direction == 'e' or direction == 'E':
         msb_top(array3, nozzles, matrix)
         matrix = bottom_shift(matrix, nozzles)
-    elif direction == 'w' or direction == 'W' or direction == '180':
+    elif direction == 'w' or direction == 'W':
         lsb_top(array3, nozzles, matrix)
         matrix = bottom_shift(matrix, nozzles)
     printJob = to_print(matrix)
@@ -200,7 +201,7 @@ characters = {' ': [0, 0, 0, 0],
               '{': [8, 28, 34, 0],
               '|': [62, 0],
               '}': [34, 28, 8, 0],
-              '~': [8, 4, 8, 4, 0]}
+              '~': [8, 4, 8, 4, 0]}  # use this set for 7 nozzles
 
 
 characters9 = {' ': [0, 0, 0, 0, 0],
@@ -298,10 +299,10 @@ characters9 = {' ': [0, 0, 0, 0, 0],
                '|': [254, 0],
                '}': [130, 108, 16, 0],
                '~': [16, 8, 16, 8, 0],
-               '£': [144, 252, 146, 146, 132, 0]}
+               '£': [144, 252, 146, 146, 132, 0]}  # use this set for 9 nozzles
 
-# lines = np.array([0, 1, 8, 64, 65])
-lines = np.array([0, 256, 16, 1, 257])
+# lines = np.array([0, 1, 8, 64, 65])  # use this set for 7 nozzles
+lines = np.array([0, 256, 16, 1, 257])  # use this set for 9 nozzles
 
 
 nozzles = 9
