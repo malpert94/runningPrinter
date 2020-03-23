@@ -1,21 +1,59 @@
-#!/usr/bin/python
-
+#!/usr/bin/python3
 import socket
 import select
 import sys
 import time
 import xml.etree.ElementTree as ET
+from xml.etree.ElementTree import tostring, Element, SubElement
 #from rospkg import RosPack
 from threading import Thread, Lock
 from copy import deepcopy
+from datetime import datetime
 import parseFromString1 as pfs
 import logging
 import decArrayProd as dap
 import shift as sr
+import serial
 # from xmlToVari import xml2vari as xml2v
-with open('PrinterLog.log', 'w'):pass
-logging.basicConfig(filename='PrinterLog.log', format='%(asctime)s - %(levelname)s: %(message)s',level=logging.INFO) # 
+logname = datetime.now().strftime("%Y-%m-%d")
+with open(logname + '_PrinterLog.log', 'w'):pass
+logging.basicConfig(filename=logname + '_PrinterLog.log', format='%(asctime)s - %(levelname)s: %(message)s',level=logging.INFO) # 
 logging.info("Program start")
+
+"""Setting up Arduino USB serial port"""
+ard = serial.Serial('/dev/ttyACM0', 9600, timeout = 1)
+
+def sendToArd(signal):
+    ard.write(signal.encode())
+    if signal == "1":
+        print("[Printer]: Prime sequence initiated")
+        logging.info("Prime sequence initiated")
+    elif signal == "2":
+        print("[Printer]: Purge sequence initiated")
+        logging.info("Purge sequence initiated")
+
+def readArd():
+    ret = ard.read().decode("ASCII")#line()#.decode()
+    return ret
+
+def prime():
+    global printerActivity
+    sendToArd("1")
+    while ard.inWaiting() < 1:
+        continue
+    retu = readArd()
+    while retu == "1":
+        printerActivity = "Priming"
+        print("Priming...")
+        logging.info("System priming...")
+        while ard.inWaiting() < 1:
+            continue
+        retu = readArd()
+    if retu == "2":
+        print("Primed")
+        logging.info("System primed and ready")
+        printerActivity = "Ready"
+
 """ Setting up a server to TCP/IP comm testing """
 
 Server_IP = "10.0.0.17"  # home
@@ -38,6 +76,8 @@ class xml2vari():
         global Distance
         global Functional
         global Start
+        global printerActivity
+        global printerErrors
         Text = None
         Lines = None
         Direction = None
@@ -60,6 +100,8 @@ class xml2vari():
         global Begin
         global job
         global gap
+        global printerActivity
+        printerActivity = "Processing"
         
         contents = message.findall(".//")
         ID = contents[1].text
@@ -82,7 +124,8 @@ class xml2vari():
         Lines = None
         Direction = None
         Length = None
-        time.sleep(0.003)
+        printerActivity = "Ready"
+#         time.sleep(0.003)
 #         params = (Text, Lines, Direction, Length)
 #         return params
 
@@ -112,14 +155,35 @@ class xml2vari():
     def parseHS(message):
         
         global Functional  # update to match stucture set by Rugged Robotics**
-        
+        global primed
+        global printerActivity
         contents = message.findall(".//")
         Functional = contents[1].text
         print("[Printer]: Handshake received, Functional: ", Functional)
         logging.info("Functional: " + Functional)
-        
-        params = (Functional)
-        return params
+        if Functional == "YES":
+#             prime()
+#             primed = 1
+            prime_thread = Thread(target=prime)
+            prime_thread.daemon = True
+            prime_thread.start()
+            primed = 1
+#             sendToArd("1")#*********************************************************HERE
+#         while ard.inWaiting() < 1:
+#             continue
+#         retu = readArd()
+#         while retu == "1":
+#             printerActivity = "Priming"
+#             print("Priming...")
+#             logging.info("System priming...")
+#             while ard.inWaiting() < 1:
+#                 continue
+#             retu = readArd()
+#         if retu == "2":
+#             print("Primed")
+#             logging.info("System primed and ready")
+#             printerActivity = "Ready"
+            
         
     def parseTrig(message):
         
@@ -135,38 +199,56 @@ class xml2vari():
         for elem in message:
             if elem.tag == "Command":
                 params = xml2vari.parseCmd(message)
+                logging.info("Command ID: " + ID + " ready to print.")
             elif elem.tag == "Status":
                 params = xml2vari.parseStat(message)
             elif elem.tag == "Handshake":
-                params = xml2vari.parseHS(message)
+#                 params = xml2vari.parseHS(message)
+                xml2vari.parseHS(message)
             elif elem.tag == "Trigger":
                 params = xml2vari.parseTrig(message)
             else:
                 break
-        return params
+#         return params
 
     def parseMessage(self, comms):
+        global printerErrors
+        
         strcomm = comms.decode("ASCII")
         try:
             message = ET.XML(comms)
             params = xml2vari.checkMessage(message)
             return params
         except:
+            printerErrors = "1"
             print("Parsing error")
             logging.error("Parsing error: " + str(comms))
             pass
 #         params = xml2vari.checkMessage(message)
 #         return params
-
-# ser = xml2vari()
+def sendHB():
+    global printerActivity
+    global printerErrors
+#     global printerAvailability
+    Blueprint = Element('Blueprint')
+    Status = SubElement(Blueprint, 'Status')
+    activity = SubElement(Status, 'Activity')
+    errors = SubElement(Status, 'Errors')
+    while True:
+        activity.text = printerActivity
+        errors.text = printerErrors
+        printerHB = tostring(Blueprint)
+        server.connection.sendall(printerHB)
+        printerErrors = "0"
+#         print("printerHB sent")
+#         print(printerHB)
+        time.sleep(0.03)
+    
 class TestServer(object):
     """ Setup the basics of the server """
-    #global value
 
     def __init__(self):
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        # This populates with the the IP and port, lookup what port to use.
-        # ex: self.server_address = ("192.168.1.100", 22171)
         self.server_address = (Server_IP, Server_Port)
         self._lock = Lock()
         self._data = []
@@ -183,7 +265,6 @@ class TestServer(object):
         self.sock.listen(1)
 
         while not self.connected:
-#             wait for the connection
             print('[Printer]: Waiting for connection...')
             self.connection, self.client_address = self.sock.accept()
             time.sleep(0.5)
@@ -200,27 +281,24 @@ class TestServer(object):
         self.connection.sendall(handshake)
         print("[Printer]: Handshake sent to client at %s with port %s" % self.client_address)
         logging.info("Handshake sent to client at %s with port %s" % self.client_address)
+        
         while self.connected:
-#             set the lock to read the current common variable
-#             lock will release with with statement ends
+#             set the lock to read the current common variable lock will release with with statement ends
             with self._lock:
                 if self._data:
 #                     print("Current data in buffer is {}".format(self._data))
-#                     print(type(self._data))
                     message = self._data.pop(0)
                     ser.parseMessage(message)
                 else:
                     pass
-#             if message:
-#                 ser.parseMessage(message)
 #           time.sleep(0.5)
 
     def _run_data_thread(self):
-        print("Data thread starting")
+        print("[Printer]: Data thread starting")
         while self.connected:
             data = ''
 #             check for data on the buffer
-            ready = select.select([self.connection], [], [], 0.01)
+            ready = select.select([self.connection], [], [], 0.5)
 #             if data on the buffer, read it
             if ready[0]:
                 data = self.connection.recv(1024)
@@ -255,16 +333,24 @@ def printing():
     global job
     global gap
     global Availability
+    global printerActivity
+    global printerErrors
+    global primed
     job = 0
     Start = 0
-    while Functional == "YES":
+#     printerActivity = 0#"Waiting"
+    primed = 0
+    printerErrors = "0"
+    printerActivity = "Priming"
+    while Functional == "YES":# and primed == 1:
+#         printerActivity = "Ready"
 #         Tell Arduino to Prime
-        print(Activity, Errors, RoverSpeed, Distance)
+#         print(Activity, Errors, RoverSpeed, Distance)
 #         print(Text, Lines, Direction, Length)
         if job and Start:
             for x in range(int(Begin)-1, len(job)):
                 if Activity == "ACTIVE":
-                    Availability = "Printing"
+                    printerActivity = "Printing"
                     sr.shift_in(job[x])
 #                 sr.print_job()
                     logging.info("ID: " + ID + "Element " + str(x+1) + "/" + str(len(job)) + " printed")
@@ -273,19 +359,21 @@ def printing():
                     time.sleep(delay)
                 else:
                     logging.info("Status is inactive, waiting...")
-                    Availability = "Waiting"
+                    printerActivity = "Waiting"
                     while Activity != "ACTIVE":
                         continue
             job = None
             gap = None
             Start = 0
-            Availability = "Printing"
+            printerActivity = "Ready"
 #             Direction = None
 #             Length = None
         time.sleep(0.033)
 
 if __name__ == "__main__":
     global job
+    global printerActivity
+    global printerErrors
     server = TestServer()
     ser = xml2vari()
     comm_thread = Thread(target=server.run)
@@ -295,9 +383,12 @@ if __name__ == "__main__":
         continue
 #     time.sleep(1)
     # Tell arduino to prime
-    comm_thread = Thread(target=printing)
-    comm_thread.daemon = True
-    comm_thread.start()
+    print_thread = Thread(target=printing)
+    print_thread.daemon = True
+    print_thread.start()
 #     printing()
+    status_thread = Thread(target=sendHB)
+    status_thread.daemon = True
+    status_thread.start()
   
   
