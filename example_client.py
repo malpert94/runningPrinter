@@ -19,10 +19,11 @@ Server_IP = "10.0.0.17"
 # Server_IP = "172.20.10.12"
 Server_Port = 22171
 
-command = "<?xml version='1.0' encoding='UTF-8'?><Rugged><Command><ID>54</ID><Text>WALL</Text><Lines>4</Lines><Direction>90</Direction><Distance>250</Distance><Begin>1</Begin></Command></Rugged>"
+command = "<?xml version='1.0' encoding='UTF-8'?><Rugged><Command><ID>12</ID><Text>Rugged</Text><Lines>4</Lines><Direction>270</Direction><Distance>400</Distance><Begin>1</Begin></Command></Rugged>"
 heartbeat = "<Rugged><Status><Activity>ACTIVE</Activity><Errors>0</Errors><RoverSpeed>0.5</RoverSpeed><Distance>1</Distance></Status></Rugged>"
 handshake = "<?xml version='1.0' encoding='UTF-8'?><Rugged><Handshake><Functional>YES</Functional></Handshake></Rugged>"
 trigger = "<?xml version='1.0' encoding='UTF-8'?><Rugged><Trigger><StartPrinting>GO</StartPrinting></Trigger></Rugged>"
+
 
 
 class TestClient(object):
@@ -36,12 +37,23 @@ class TestClient(object):
 
     """ Connect and talk at an interval to the server """
 
+    def send(self, message):
+        try:
+            self.sock.sendall(message.encode("ASCII"))
+            print("Message sent: {}".format(message))
+        except:
+            print("Error: sending failed")
+
     def run(self):
 
         # connect to the the server
         print("[Rover]: Connecting to %s on port %s as client" % self.server_address)
-        self.sock.connect(self.server_address)
-
+        while True:
+            try:
+                self.sock.connect(self.server_address)
+                break
+            except:
+                pass
         # startup thread to read any messages back from the server
         self._data_thread = Thread(target=self._run_data_thread)
         self._data_thread.daemon = True   # makes the thread dependant on the parent program, so they die together
@@ -51,59 +63,66 @@ class TestClient(object):
         # print("Message sent: {}".format(handshake))
         # send a message with a certain frequency a certain number of times
         global HS
+        global primed
+        global printing
         HS = 0
-        while not HS:
+        primed = 0
+        printing = 0
+        while not HS:  # wait for handshake from printer (server)
             continue
 
-        try:
-            self.sock.sendall(handshake.encode("ASCII"))
-            print("Message sent: {}".format(handshake))
-        except:
-            print("error while sending")
+        TestClient.send(self, handshake)
         time.sleep(1)
-        for count in range(0,1):
+
+        hb = Thread(target=self.sendHB)
+        hb.daemon = True
+        hb.start()
+
+        while not primed:
+            continue
+        print("Primed")
+
+        command = "<?xml version='1.0' encoding='UTF-8'?><Rugged><Command><ID>0</ID><Text>Rugged</Text><Lines>4</Lines><Direction>270</Direction><Distance>40</Distance><Begin>1</Begin></Command></Rugged>"
+        TestClient.send(self, command)
+        time.sleep(0.1)
+
+        TestClient.send(self, trigger)
+        time.sleep(1)
+
+        comms = 0
+        while comms < 3:
             # send a message piece
-            try:
-                message = "<?xml version='1.0' encoding='UTF-8'?><Rugged><Status><Activity>ACTIVE</Activity><Errors>0</Errors><RoverSpeed>" + str(rnd.randint(10, 50)) + "</RoverSpeed><Distance>1</Distance></Status></Rugged>"
-                #message = str(count)
-                self.sock.sendall(message.encode("ASCII"))
-                print("Message sent: {}".format(message))
-            except:
-                print("error while sending")
-            time.sleep(0.033)
+            while printing:
+                continue
+            if primed:
+                command = "<?xml version='1.0' encoding='UTF-8'?><Rugged><Command><ID>" + str(comms+1) + "</ID><Text>Rugged</Text><Lines>4</Lines><Direction>270</Direction><Distance>40</Distance><Begin>1</Begin></Command></Rugged>"
+                TestClient.send(self, command)
+                time.sleep(0.1)
+                TestClient.send(self, trigger)
+                time.sleep(1)
+            while printing:
+                continue
+            comms += 1
+        Activity = "INACTIVE"
         try:
-            self.sock.sendall(command.encode("ASCII"))
-            print("Message sent: {}".format(command))
+            end = "<Rugged><Status><Activity>INACTIVE</Activity><Errors>0</Errors><RoverSpeed>0</RoverSpeed><Distance>0</Distance></Status></Rugged>"
+            self.sock.sendall(end.encode("ASCII"))
+            print("Message sent: {}".format(end))
         except:
             print("error while sending")
-        time.sleep(0.033)
-        try:
-            self.sock.sendall(trigger.encode("ASCII"))
-            print("Message sent: {}".format(trigger))
-        except:
-            print("error while sending")
-        time.sleep(0.033)
-        while True:
-            # send a message piece
-            try:
-                message = "<?xml version='1.0' encoding='UTF-8'?><Rugged><Status><Activity>ACTIVE</Activity><Errors>0</Errors><RoverSpeed>" + str(rnd.randint(30,70)) + "</RoverSpeed><Distance>1</Distance></Status></Rugged>"
-                # message = str(count)
-                self.sock.sendall(message.encode("ASCII"))
-                print("Message sent: {}".format(message))
-            except:
-                print("error while sending")
-                break
-            time.sleep(0.033)
-
-
+        time.sleep(0.05)
+        hb.join()
 
         print("[Rover]: Closing socket")
         self.sock.close()
+        quit()
 
 
     def _run_data_thread(self):
         print("data thread starting")
         global HS
+        global primed
+        global printing
         while True:
             data = ''
             # check for data on the buffer
@@ -112,9 +131,14 @@ class TestClient(object):
             if ready[0]:
                 data = self.sock.recv(1024)
             if data:
-                print('Message received: %s' % data.decode("ASCII"))
+                # print('Message received: %s' % data.decode("ASCII"))
                 if data.decode("ASCII") == "<?xml version='1.0' encoding='UTF-8'?><Blueprint><Handshake><Functional>YES</Functional><Functional>NO</Functional></Handshake></Blueprint>":
                     HS = 1
+                elif data.decode("ASCII") == "<Blueprint><Status><Activity>Ready</Activity><Errors>0</Errors></Status></Blueprint>":
+                    primed = 1
+                    printing = 0
+                elif data.decode("ASCII") == "<Blueprint><Status><Activity>Printing</Activity><Errors>0</Errors></Status></Blueprint>":
+                    printing = 1
                 # ret = data
                 # print("ret = ", ret)
                 data = ''
@@ -122,9 +146,24 @@ class TestClient(object):
                 pass
             time.sleep(0.01)
 
+    def sendHB(self):
+        global Activity
+        Activity = "ACTIVE"
+        while True:
+            message = "<?xml version='1.0' encoding='UTF-8'?><Rugged><Status><Activity>" + Activity + "</Activity><Errors>0</Errors><RoverSpeed>" + str(
+            rnd.randint(10, 50)) + "</RoverSpeed><Distance>1</Distance></Status></Rugged>"
+            try:
+                self.sock.sendall(message.encode("ASCII"))
+            except:
+                print("Error: sending failed")
+                break
+            time.sleep(0.05)
+
+
 
 if __name__ == "__main__":
     global HS
+    global printing
     client = TestClient()
     client.run()
 
