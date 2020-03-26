@@ -247,6 +247,8 @@ class xml2vari():
 def sendHB():
     global printerActivity
     global printerErrors
+    printerActivity = "Starting up"
+    printerErrors = "0"
 #     global printerAvailability
     Blueprint = Element('Blueprint')
     Status = SubElement(Blueprint, 'Status')
@@ -257,6 +259,7 @@ def sendHB():
         errors.text = printerErrors
         printerHB = tostring(Blueprint)
         server.connection.sendall(printerHB)
+#         print(printerActivity)
         printerErrors = "0"
 #         print("printerHB sent")
 #         print(printerHB)
@@ -296,6 +299,7 @@ class TestServer(object):
         self._data_thread = Thread(target=self._run_data_thread)
         self._data_thread.daemon = True
         self._data_thread.start()
+        input("Send HS: ")##############################################################
         self.connection.sendall(handshake)
         print("[Printer]: Handshake sent to client at %s with port %s" % self.client_address)
         logging.info("Handshake sent to client at %s with port %s" % self.client_address)
@@ -365,7 +369,7 @@ def printing():
     while Functional == "YES" and Activity == "ACTIVE":# and primed == 1:
 #         printerActivity = "Ready"
 #         Tell Arduino to Prime
-        print(Activity, Errors, RoverSpeed, Distance)
+#         print(Activity, Errors, RoverSpeed, Distance)
 #         print(Text, Lines, Direction, Length)
         if job and Start:
             for x in range(int(Begin)-1, len(job)):
@@ -388,9 +392,11 @@ def printing():
             printerActivity = "Ready"
 #             Direction = None
 #             Length = None
-        time.sleep(0.033)
+        time.sleep(0.03)
+#         print(Activity)
     if Activity == "INACTIVE":
         purge()
+        logging.info("Printing thread closing")
         quit()
 
 if __name__ == "__main__":
@@ -405,13 +411,20 @@ if __name__ == "__main__":
     while not Functional:  # waiting for handshake to say functional
         continue
 #     time.sleep(1)
-    # Tell arduino to prime
-    print_thread = Thread(target=printing)
-    print_thread.daemon = True
-    print_thread.start()
-#     printing()
     status_thread = Thread(target=sendHB)
     status_thread.daemon = True
     status_thread.start()
+    
+    print_thread = Thread(target=printing)
+    print_thread.daemon = True
+    print_thread.start()
+    
+    print_thread.join()
+    comm_thread.join()
+    status_thread.join()
+    
+    quit()
+#     printing()
+
   
   
