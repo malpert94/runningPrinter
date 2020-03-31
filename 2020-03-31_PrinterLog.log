@@ -1,0 +1,96 @@
+2020-03-31 02:50:34,013 - INFO: Program start
+2020-03-31 02:50:34,044 - INFO: Starting as server at 10.0.0.17 with port 22171
+2020-03-31 02:50:36,955 - INFO: New client at 10.0.0.103 with port 60711
+2020-03-31 02:50:36,967 - INFO: Handshake sent to client at 10.0.0.103 with port 60711
+2020-03-31 02:50:38,035 - INFO: Functional: YES
+2020-03-31 02:50:38,072 - INFO: Prime sequence initiated
+2020-03-31 02:50:39,067 - INFO: System priming...
+2020-03-31 02:50:44,057 - INFO: System primed and ready
+2020-03-31 02:50:44,090 - INFO: Command ID: 1
+2020-03-31 02:50:44,091 - INFO: Text: Rugged
+2020-03-31 02:50:44,101 - INFO: Lines: 4
+2020-03-31 02:50:44,101 - INFO: Direction: 270
+2020-03-31 02:50:44,102 - INFO: Distance: 40
+2020-03-31 02:50:44,103 - INFO: Begin: 1
+2020-03-31 02:50:44,105 - INFO: Command ID: 1 ready to print.
+2020-03-31 02:50:44,184 - INFO: Start: GO
+2020-03-31 02:50:44,203 - INFO: ID: 1; Element 1/13 printed
+2020-03-31 02:50:44,448 - INFO: ID: 1; Element 2/13 printed
+2020-03-31 02:50:44,682 - INFO: ID: 1; Element 3/13 printed
+2020-03-31 02:50:44,906 - INFO: ID: 1; Element 4/13 printed
+2020-03-31 02:50:45,150 - INFO: ID: 1; Element 5/13 printed
+2020-03-31 02:50:45,388 - INFO: ID: 1; Element 6/13 printed
+2020-03-31 02:50:45,617 - INFO: ID: 1; Element 7/13 printed
+2020-03-31 02:50:45,867 - INFO: ID: 1; Element 8/13 printed
+2020-03-31 02:50:46,082 - INFO: ID: 1; Element 9/13 printed
+2020-03-31 02:50:46,326 - INFO: ID: 1; Element 10/13 printed
+2020-03-31 02:50:46,542 - INFO: ID: 1; Element 11/13 printed
+2020-03-31 02:50:46,773 - INFO: ID: 1; Element 12/13 printed
+2020-03-31 02:50:47,093 - INFO: ID: 1; Element 13/13 printed
+2020-03-31 02:50:47,356 - INFO: Command ID: 2
+2020-03-31 02:50:47,356 - INFO: Text: Rugged
+2020-03-31 02:50:47,356 - INFO: Lines: 4
+2020-03-31 02:50:47,356 - INFO: Direction: 270
+2020-03-31 02:50:47,356 - INFO: Distance: 40
+2020-03-31 02:50:47,356 - INFO: Begin: 1
+2020-03-31 02:50:47,358 - INFO: Command ID: 2 ready to print.
+2020-03-31 02:50:47,459 - INFO: Start: GO
+2020-03-31 02:50:47,495 - INFO: ID: 2; Element 1/13 printed
+2020-03-31 02:50:47,724 - INFO: ID: 2; Element 2/13 printed
+2020-03-31 02:50:47,941 - INFO: ID: 2; Element 3/13 printed
+2020-03-31 02:50:48,180 - INFO: ID: 2; Element 4/13 printed
+2020-03-31 02:50:48,418 - INFO: ID: 2; Element 5/13 printed
+2020-03-31 02:50:48,704 - INFO: ID: 2; Element 6/13 printed
+2020-03-31 02:50:48,982 - INFO: ID: 2; Element 7/13 printed
+2020-03-31 02:50:49,204 - INFO: ID: 2; Element 8/13 printed
+2020-03-31 02:50:49,429 - INFO: ID: 2; Element 9/13 printed
+2020-03-31 02:50:49,702 - INFO: ID: 2; Element 10/13 printed
+2020-03-31 02:50:49,952 - INFO: ID: 2; Element 11/13 printed
+2020-03-31 02:50:50,222 - INFO: ID: 2; Element 12/13 printed
+2020-03-31 02:50:50,483 - INFO: ID: 2; Element 13/13 printed
+2020-03-31 02:50:50,710 - INFO: Command ID: 3
+2020-03-31 02:50:50,710 - INFO: Text: Rugged
+2020-03-31 02:50:50,711 - INFO: Lines: 4
+2020-03-31 02:50:50,711 - INFO: Direction: 270
+2020-03-31 02:50:50,711 - INFO: Distance: 40
+2020-03-31 02:50:50,711 - INFO: Begin: 1
+2020-03-31 02:50:50,712 - INFO: Command ID: 3 ready to print.
+2020-03-31 02:50:50,824 - INFO: Start: GO
+2020-03-31 02:50:50,870 - INFO: ID: 3; Element 1/13 printed
+2020-03-31 02:50:51,147 - INFO: ID: 3; Element 2/13 printed
+2020-03-31 02:50:51,384 - INFO: ID: 3; Element 3/13 printed
+2020-03-31 02:50:51,638 - INFO: ID: 3; Element 4/13 printed
+2020-03-31 02:50:51,922 - INFO: ID: 3; Element 5/13 printed
+2020-03-31 02:50:52,232 - INFO: ID: 3; Element 6/13 printed
+2020-03-31 02:50:52,456 - INFO: ID: 3; Element 7/13 printed
+2020-03-31 02:50:52,682 - INFO: ID: 3; Element 8/13 printed
+2020-03-31 02:50:52,959 - INFO: ID: 3; Element 9/13 printed
+2020-03-31 02:50:53,278 - INFO: ID: 3; Element 10/13 printed
+2020-03-31 02:50:53,568 - INFO: ID: 3; Element 11/13 printed
+2020-03-31 02:50:53,838 - INFO: ID: 3; Element 12/13 printed
+2020-03-31 02:50:54,125 - INFO: ID: 3; Element 13/13 printed
+2020-03-31 02:50:54,389 - INFO: Command ID: 4
+2020-03-31 02:50:54,390 - INFO: Text: Rugged
+2020-03-31 02:50:54,390 - INFO: Lines: 4
+2020-03-31 02:50:54,390 - INFO: Direction: 270
+2020-03-31 02:50:54,390 - INFO: Distance: 40
+2020-03-31 02:50:54,390 - INFO: Begin: 1
+2020-03-31 02:50:54,391 - INFO: Command ID: 4 ready to print.
+2020-03-31 02:50:54,498 - INFO: Start: GO
+2020-03-31 02:50:54,585 - INFO: ID: 4; Element 1/13 printed
+2020-03-31 02:50:54,807 - INFO: ID: 4; Element 2/13 printed
+2020-03-31 02:50:55,128 - INFO: ID: 4; Element 3/13 printed
+2020-03-31 02:50:55,357 - INFO: ID: 4; Element 4/13 printed
+2020-03-31 02:50:55,592 - INFO: ID: 4; Element 5/13 printed
+2020-03-31 02:50:55,899 - INFO: ID: 4; Element 6/13 printed
+2020-03-31 02:50:56,209 - INFO: ID: 4; Element 7/13 printed
+2020-03-31 02:50:56,426 - INFO: ID: 4; Element 8/13 printed
+2020-03-31 02:50:56,661 - INFO: ID: 4; Element 9/13 printed
+2020-03-31 02:50:56,905 - INFO: ID: 4; Element 10/13 printed
+2020-03-31 02:50:57,119 - INFO: ID: 4; Element 11/13 printed
+2020-03-31 02:50:57,389 - INFO: ID: 4; Element 12/13 printed
+2020-03-31 02:50:57,660 - INFO: ID: 4; Element 13/13 printed
+2020-03-31 02:50:57,986 - INFO: Purge sequence initiated
+2020-03-31 02:50:58,986 - INFO: System purging...
+2020-03-31 02:51:03,981 - INFO: System purged
+2020-03-31 02:51:03,992 - INFO: Printing thread closing
