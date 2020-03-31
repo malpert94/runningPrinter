@@ -65,12 +65,15 @@ class TestClient(object):
         global HS
         global primed
         global printing
+        global Activity
+        global purged
         HS = 0
         primed = 0
         printing = 0
         while not HS:  # wait for handshake from printer (server)
             continue
 
+        time.sleep(1)
         TestClient.send(self, handshake)
         time.sleep(1)
 
@@ -80,38 +83,23 @@ class TestClient(object):
 
         while not primed:
             continue
-        print("Primed")
-
-        command = "<?xml version='1.0' encoding='UTF-8'?><Rugged><Command><ID>0</ID><Text>Rugged</Text><Lines>4</Lines><Direction>270</Direction><Distance>40</Distance><Begin>1</Begin></Command></Rugged>"
-        TestClient.send(self, command)
-        time.sleep(0.1)
-
-        TestClient.send(self, trigger)
-        time.sleep(1)
 
         comms = 0
-        while comms < 3:
-            # send a message piece
-            while printing:
-                continue
-            if primed:
+        while comms < 4:
+            if primed and not purged:
                 command = "<?xml version='1.0' encoding='UTF-8'?><Rugged><Command><ID>" + str(comms+1) + "</ID><Text>Rugged</Text><Lines>4</Lines><Direction>270</Direction><Distance>40</Distance><Begin>1</Begin></Command></Rugged>"
                 TestClient.send(self, command)
                 time.sleep(0.1)
+                # input("Trigger? ")
                 TestClient.send(self, trigger)
                 time.sleep(1)
             while printing:
                 continue
             comms += 1
         Activity = "INACTIVE"
-        try:
-            end = "<Rugged><Status><Activity>INACTIVE</Activity><Errors>0</Errors><RoverSpeed>0</RoverSpeed><Distance>0</Distance></Status></Rugged>"
-            self.sock.sendall(end.encode("ASCII"))
-            print("Message sent: {}".format(end))
-        except:
-            print("error while sending")
-        time.sleep(0.05)
-        hb.join()
+
+        while not purged:
+            continue
 
         print("[Rover]: Closing socket")
         self.sock.close()
@@ -123,6 +111,8 @@ class TestClient(object):
         global HS
         global primed
         global printing
+        global purged
+        purged = 0
         while True:
             data = ''
             # check for data on the buffer
@@ -139,9 +129,9 @@ class TestClient(object):
                     printing = 0
                 elif data.decode("ASCII") == "<Blueprint><Status><Activity>Printing</Activity><Errors>0</Errors></Status></Blueprint>":
                     printing = 1
-                # ret = data
-                # print("ret = ", ret)
-                data = ''
+                elif data.decode("ASCII") == "<Blueprint><Status><Activity>Purged</Activity><Errors>0</Errors></Status></Blueprint>":
+                    printing = 0
+                    purged = 1
             else:
                 pass
             time.sleep(0.01)
@@ -151,7 +141,7 @@ class TestClient(object):
         Activity = "ACTIVE"
         while True:
             message = "<?xml version='1.0' encoding='UTF-8'?><Rugged><Status><Activity>" + Activity + "</Activity><Errors>0</Errors><RoverSpeed>" + str(
-            rnd.randint(10, 50)) + "</RoverSpeed><Distance>1</Distance></Status></Rugged>"
+            rnd.randint(40, 50)) + "</RoverSpeed><Distance>1</Distance></Status></Rugged>"
             try:
                 self.sock.sendall(message.encode("ASCII"))
             except:
