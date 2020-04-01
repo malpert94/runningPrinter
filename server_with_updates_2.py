@@ -366,7 +366,6 @@ def printing():
     global primed
     job = 0
     Start = 0
-#     printerActivity = 0#"Waiting"
     primed = 0
     printerErrors = "0"
     printerActivity = "Priming"
@@ -374,18 +373,14 @@ def printing():
         continue
     while Functional == "YES" and Activity == "ACTIVE":# and primed == 1:
 #         printerActivity = "Ready"
-#         Tell Arduino to Prime
-#         print(Activity, Errors, RoverSpeed, Distance)
-#         print(Text, Lines, Direction, Length)
         if job and Start:
             for x in range(int(Begin)-1, len(job)):
                 if Activity == "ACTIVE" and Errors == "0":
                     printerActivity = "Printing"
                     sr.shift_in(job[x])
-#                 sr.print_job()
+                    sr.print_job()
                     logging.info("ID: " + ID + "; Element " + str(x+1) + "/" + str(len(job)) + " printed")
-                    delay = int(gap)/float(RoverSpeed) #* int(gap)
-#                     print(RoverSpeed, round(delay))
+                    delay = int(gap)/float(RoverSpeed)
                     time.sleep(delay)
                 else:
                     logging.info("Status is inactive, waiting...")
@@ -396,13 +391,12 @@ def printing():
             gap = None
             Start = 0
             printerActivity = "Ready"
-#             Direction = None
-#             Length = None
         time.sleep(0.03)
-#         print(Activity)
+        
     if Activity == "INACTIVE":
         purge()
         logging.info("Printing thread closing")
+#         os.system("sudo shutdown -h now")
         sys.exit()
 
 if __name__ == "__main__":
@@ -433,7 +427,6 @@ if __name__ == "__main__":
     print("comm thread closing")
     status_thread.join()
     
-#     printing()
 
   
   
